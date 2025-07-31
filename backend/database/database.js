@@ -1,4 +1,4 @@
-const { Client } = require("pg")
+const { Pool } = require("pg")
 const { v4: uuidv4 } = require("uuid")
 require("dotenv").config()
 
@@ -8,7 +8,7 @@ const connectDB = async () => {
   if (client) return client
 
   try {
-    client = new Client({
+    client = new Pool({
       connectionString: process.env.DATABASE_URL,
       ssl: {
         rejectUnauthorized: false,
