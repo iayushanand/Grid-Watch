@@ -49,17 +49,22 @@ app.get("/last", async (req, res) => {
 
   const my_key = process.env.api_key
 
-
-  console.log(api_key)
-  console.log(my_key)
-  
-  if (my_key !== api_key){
-    return res.status(403).json({error: "Wrong API Key"})
-  }
   try {
     const data = await fetchLastData()
     data.s = api_key
     data.k = my_key
+
+
+  console.log(api_key)
+  console.log(my_key)
+
+    console.log(data)
+  
+
+  if (my_key !== api_key){
+    return res.status(403).json({error: "Wrong API Key"})
+  }
+
     res.json(data)
   } catch (err) {
     console.error("Fetch last error:", err)
