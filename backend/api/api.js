@@ -24,7 +24,7 @@ app.post("/upload", async (req, res) => {
   const { timestamp, duration } = req.body
   const api_key = req.get("X-ApiKey")
 
-  const my_key = process.env.api_key
+  const my_key = process.env.API_KEY
   
   if (my_key !== api_key){
     return res.status(403).json({error: "Wrong API Key"})
@@ -47,7 +47,7 @@ app.post("/upload", async (req, res) => {
 app.get("/last", async (req, res) => {
   const api_key = req.get("X-ApiKey")
 
-  const my_key = process.env.api_key
+  const my_key = process.env.API_KEY
    
   if (my_key !== api_key){
     return res.status(403).json({error: "Wrong API Key"})
@@ -64,7 +64,7 @@ app.get("/last", async (req, res) => {
 app.get("/all", async (req, res) => {
   const api_key = req.get("X-ApiKey")
 
-  const my_key = process.env.api_key
+  const my_key = process.env.API_KEY
   
   if (my_key !== api_key){
     return res.status(403).json({error: "Wrong API Key"})
@@ -81,7 +81,7 @@ app.get("/all", async (req, res) => {
 app.get("/long", async (req, res) => {
   const api_key = req.get("X-ApiKey")
 
-  const my_key = process.env.api_key
+  const my_key = process.env.API_KEY
   
   if (my_key !== api_key){
     return res.status(403).json({error: "Wrong API Key"})
