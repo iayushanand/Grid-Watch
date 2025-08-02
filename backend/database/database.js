@@ -25,23 +25,29 @@ const connectDB = async () => {
 }
 
 const createTable = async () => {
-  const db = await connectDB()
+  const db = await connectDB();
   const query = `
     CREATE TABLE IF NOT EXISTS outage (
       id UUID PRIMARY KEY,
       timestamp INT NOT NULL,
       duration INT NOT NULL
     );
-  `
+
+    CREATE TABLE IF NOT EXISTS ping (
+      timestamp INT NOT NULL,
+      count INT NOT NULL
+    );
+  `;
 
   try {
-    await db.query(query)
-    console.log("✅ Table 'outage' is ready")
+    await db.query(query);
+    console.log("✅ Tables 'outage' and 'ping' are ready");
   } catch (err) {
-    console.error("❌ Failed to create table:", err)
-    throw err
+    console.error("❌ Failed to create tables:", err);
+    throw err;
   }
-}
+};
+
 
 const uploadData = async (timestamp, duration) => {
   const db = await connectDB()
