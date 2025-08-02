@@ -6,30 +6,38 @@ const {
   fetchAllData,
   fetchLongestData,
   connectDB,
+  handlePing,
 } = require("../database/database.js")
 require("dotenv").config()
 
 
+const my_key = process.env.API_KEY
 const app = express()
 app.use(express.json())
 
-// Ensure DB is connected before handling requests
-connectDB()
 
 app.get("/", (req, res) => {
-  res.json({ message: "Server is running ✅" })
+  res.json({ message: "server is running" })
 })
 
-app.post("/upload", async (req, res) => {
-  const { timestamp, duration } = req.body
-  const api_key = req.get("X-ApiKey")
 
-  const my_key = process.env.API_KEY
-  
+app.get("/ping", async (req, res) => {
+  const api_key = req.get("X-ApiKey")
   if (my_key !== api_key){
     return res.status(403).json({error: "Wrong API Key"})
   }
+    await handlePing();
+    res.json({message: "Pinged successfully!"})
+})
 
+
+app.post("/upload", async (req, res) => {
+  const api_key = req.get("X-ApiKey")
+  if (my_key !== api_key){
+    return res.status(403).json({error: "Wrong API Key"})
+  }
+  
+  const { timestamp, duration } = req.body
 
   if (!timestamp || !duration) {
     return res.status(400).json({ error: "Missing timestamp or duration" })
@@ -44,14 +52,13 @@ app.post("/upload", async (req, res) => {
   }
 })
 
-app.get("/last", async (req, res) => {
-  const api_key = req.get("X-ApiKey")
 
-  const my_key = process.env.API_KEY
-   
+app.get("/last", async (req, res) => {
+  const api_key = req.get("X-ApiKey")   
   if (my_key !== api_key){
     return res.status(403).json({error: "Wrong API Key"})
   }
+
   try {
     const data = await fetchLastData()
     res.json(data)
@@ -61,10 +68,9 @@ app.get("/last", async (req, res) => {
   }
 })
 
+
 app.get("/all", async (req, res) => {
   const api_key = req.get("X-ApiKey")
-
-  const my_key = process.env.API_KEY
   
   if (my_key !== api_key){
     return res.status(403).json({error: "Wrong API Key"})
@@ -78,11 +84,10 @@ app.get("/all", async (req, res) => {
   }
 })
 
+
 app.get("/long", async (req, res) => {
   const api_key = req.get("X-ApiKey")
 
-  const my_key = process.env.API_KEY
-  
   if (my_key !== api_key){
     return res.status(403).json({error: "Wrong API Key"})
   }
@@ -95,6 +100,6 @@ app.get("/long", async (req, res) => {
   }
 })
 
-// Export for Vercel
+
 module.exports = app
 module.exports.handler = serverless(app)
