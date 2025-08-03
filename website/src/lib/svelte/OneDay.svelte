@@ -62,7 +62,7 @@
 
     function handleMouseEnter(e, data) {
         const rect = e.target.getBoundingClientRect();
-        const tooltipWidth = 200; // Estimated max width of the tooltip
+        const tooltipWidth = 200;
         const padding = 8;
 
         let x = rect.left + rect.width / 2;
@@ -70,7 +70,6 @@
 
         const screenWidth = window.innerWidth;
 
-        // Prevent tooltip from overflowing left or right
         if (x - tooltipWidth / 2 < padding) {
             x = tooltipWidth / 2 + padding;
         } else if (x + tooltipWidth / 2 > screenWidth - padding) {

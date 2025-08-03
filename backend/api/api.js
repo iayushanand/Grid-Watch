@@ -4,7 +4,11 @@ const {
   uploadData,
   fetchLastData,
   fetchAllData,
+  fetchDailyData,
+  fetchWeeklyData,
+  fetchMonthlyData,
   fetchLongestData,
+  fetchLastPing,
   connectDB,
   handlePing,
 } = require("../database/database.js")
@@ -77,6 +81,70 @@ app.get("/all", async (req, res) => {
   }
   try {
     const data = await fetchAllData()
+    res.json(data)
+  } catch (err) {
+    console.error("Fetch all error:", err)
+    res.status(500).json({ error: "Failed to fetch all data" })
+  }
+})
+
+
+app.get("/daily", async (req, res) => {
+  const api_key = req.get("X-ApiKey")
+  
+  if (my_key !== api_key){
+    return res.status(403).json({error: "Wrong API Key"})
+  }
+  try {
+    const data = await fetchDailyData()
+    res.json(data)
+  } catch (err) {
+    console.error("Fetch all error:", err)
+    res.status(500).json({ error: "Failed to fetch all data" })
+  }
+})
+
+
+app.get("/weekly", async (req, res) => {
+  const api_key = req.get("X-ApiKey")
+  
+  if (my_key !== api_key){
+    return res.status(403).json({error: "Wrong API Key"})
+  }
+  try {
+    const data = await fetchWeeklyData()
+    res.json(data)
+  } catch (err) {
+    console.error("Fetch all error:", err)
+    res.status(500).json({ error: "Failed to fetch all data" })
+  }
+})
+
+
+app.get("/monthly", async (req, res) => {
+  const api_key = req.get("X-ApiKey")
+  
+  if (my_key !== api_key){
+    return res.status(403).json({error: "Wrong API Key"})
+  }
+  try {
+    const data = await fetchMonthlyData()
+    res.json(data)
+  } catch (err) {
+    console.error("Fetch all error:", err)
+    res.status(500).json({ error: "Failed to fetch all data" })
+  }
+})
+
+
+app.get("/lastping", async (req, res) => {
+  const api_key = req.get("X-ApiKey")
+  
+  if (my_key !== api_key){
+    return res.status(403).json({error: "Wrong API Key"})
+  }
+  try {
+    const data = await fetchLastPing()
     res.json(data)
   } catch (err) {
     console.error("Fetch all error:", err)

@@ -63,7 +63,7 @@
 
     function handleMouseEnter(e, data) {
         const rect = e.target.getBoundingClientRect();
-        const tooltipWidth = 200; // Estimated max width of the tooltip
+        const tooltipWidth = 200;
         const padding = 8;
 
         let x = rect.left + rect.width / 2;
@@ -71,7 +71,6 @@
 
         const screenWidth = window.innerWidth;
 
-        // Prevent tooltip from overflowing left or right
         if (x - tooltipWidth / 2 < padding) {
             x = tooltipWidth / 2 + padding;
         } else if (x + tooltipWidth / 2 > screenWidth - padding) {
@@ -113,7 +112,6 @@
 
 <p class="mx-4 text-sm mt-2 text-gray-300">7d</p>
 
-<!-- Tooltip -->
 {#if showTooltip}
     <div
         class="fixed z-50 bg-black text-white text-sm px-3 py-2 rounded-md shadow-lg max-w-full whitespace-nowrap pointer-events-none"

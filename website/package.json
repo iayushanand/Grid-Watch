@@ -25,6 +25,7 @@
 		"vite": "^7.0.4"
 	},
 	"dependencies": {
-		"@lucide/svelte": "^0.536.0"
+		"@lucide/svelte": "^0.536.0",
+		"date-fns": "^4.1.0"
 	}
 }
