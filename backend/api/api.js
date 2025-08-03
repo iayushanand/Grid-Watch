@@ -1,5 +1,6 @@
 const express = require("express")
 const serverless = require("serverless-http")
+const cors = require("cors")
 const {
   uploadData,
   fetchLastData,
@@ -17,6 +18,7 @@ require("dotenv").config()
 
 const my_key = process.env.API_KEY
 const app = express()
+app.use(cors());
 app.use(express.json())
 
 
