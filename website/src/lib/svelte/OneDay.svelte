@@ -5,15 +5,19 @@
     const START_TIME = END_TIME - 24 * 60 * 60;
 
     const downtimes = [
-        { timestamp: END_TIME - 3 * 60 * 60, duration: 10 * 60 },
-        { timestamp: END_TIME - 1 * 60 * 60, duration: 10 * 60 },
-        { timestamp: END_TIME - 16 * 60 * 60, duration: 10 * 60 },
-        { timestamp: END_TIME - 13 * 60 * 60, duration: 10 * 60 },
-        { timestamp: END_TIME - 15 * 60 * 60, duration: 10 * 60 },
-        { timestamp: END_TIME - 17 * 60 * 60, duration: 10 * 60 },
-        { timestamp: END_TIME - 23 * 60 * 60, duration: 10 * 60 },
-        { timestamp: END_TIME - 6 * 60 * 60, duration: 30 * 60 }
+    { timestamp: END_TIME - 14567, duration: 760 },
+    { timestamp: END_TIME - 19234, duration: 1086 },
+    { timestamp: END_TIME - 24567, duration: 512 },
+    { timestamp: END_TIME - 31234, duration: 903 },
+    { timestamp: END_TIME - 38670, duration: 600 },
+    { timestamp: END_TIME - 44210, duration: 990 },
+    { timestamp: END_TIME - 48765, duration: 756 },
+    { timestamp: END_TIME - 53890, duration: 849 },
+    { timestamp: END_TIME - 58932, duration: 777 },
+    { timestamp: END_TIME - 63450, duration: 1012 },
+    { timestamp: END_TIME - 74456, duration: 843 }
     ];
+
 
     function formatIST(unix) {
         return new Date(unix * 1000).toLocaleString("en-IN", {
@@ -24,9 +28,10 @@
 
     const bar_details = [];
 
-    for (let i = START_TIME; i <= END_TIME; i += 60 * 60) {
-        const hourStart = i;
-        const hourEnd = i + 60 * 60;
+
+    for (let i = 0; i < 24; i++) {
+        const hourStart = END_TIME - (i + 1) * 60 * 60;
+        const hourEnd = END_TIME - i * 60 * 60;
 
         const overlaps = downtimes.filter(down => {
             const downStart = down.timestamp;
@@ -48,6 +53,8 @@
         }
     }
 
+    bar_details.reverse();
+
     let tooltipContent = "";
     let tooltipX = 0;
     let tooltipY = 0;
@@ -55,20 +62,36 @@
 
     function handleMouseEnter(e, data) {
         const rect = e.target.getBoundingClientRect();
-        tooltipX = rect.left + rect.width / 2;
-        tooltipY = rect.top - 10;
+        const tooltipWidth = 200; // Estimated max width of the tooltip
+        const padding = 8;
+
+        let x = rect.left + rect.width / 2;
+        const y = rect.top - 10;
+
+        const screenWidth = window.innerWidth;
+
+        // Prevent tooltip from overflowing left or right
+        if (x - tooltipWidth / 2 < padding) {
+            x = tooltipWidth / 2 + padding;
+        } else if (x + tooltipWidth / 2 > screenWidth - padding) {
+            x = screenWidth - tooltipWidth / 2 - padding;
+        }
+
+        tooltipX = x;
+        tooltipY = y;
 
         if (data.status === "down") {
             tooltipContent = `
                 <div><strong>${formatIST(data.hourStart)}</strong></div>
-                ${data.downtimes.map(d => `↓ ${formatIST(d.timestamp)} for ${Math.floor(d.duration / 60)} min`).join("<br>")}
+                ${data.downtimes.map(d => `🔴 ${formatIST(d.timestamp)} for ${Math.floor(d.duration / 60)} min`).join("<br>")}
             `;
         } else {
-            tooltipContent = `<div><strong>${formatIST(data.hourStart)}</strong>`;
+            tooltipContent = `<div><strong>${formatIST(data.hourStart)}</strong></div>`;
         }
 
         showTooltip = true;
     }
+
 
     function handleMouseLeave() {
         showTooltip = false;
@@ -76,7 +99,6 @@
 </script>
 
 
-<div class="mx-4 sm:mx-10 mt-10 border border-white/5 py-3 px-4 sm:px-8 bg-gray-800/30 h-[80vh] rounded-2xl overflow-hidden relative">
     <div class="mt-10 flex gap-1 sm:gap-2 px-1 sm:px-6 h-[12vh]">
         {#each bar_details as data, i}
             <div
@@ -101,4 +123,3 @@
         </div>
     {/if}
 
-</div>
