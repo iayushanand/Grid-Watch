@@ -53,10 +53,10 @@ Grid Watch is a real-time power monitoring solution designed to track the stabil
 ## 🖼️ Screenshots
 
 ### ESP Device Setup
-<!-- Add your ESP device photo here -->
+coming soon
 
 ### Website Visualization
-<!-- Add your website screenshot here -->
+![webpage](https://gcdnb.pbrd.co/images/llXGlTRtgZGb.png?o=1)
 
 ---
 
