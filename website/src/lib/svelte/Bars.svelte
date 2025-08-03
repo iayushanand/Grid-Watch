@@ -2,9 +2,27 @@
     import OneDay from "./OneDay.svelte";
     import OneWeek from "./OneWeek.svelte";
     import OneMonth from "./OneMonth.svelte";
+    import { fetchLastPing } from "$lib/ts/api";
+    import { onMount } from "svelte";
+
+    let lastPing = 0;
+    let color = "bg-yellow-500";
+    
+
+    onMount(() => {
+        setInterval(async () => {
+            const fetchedPing = await fetchLastPing();
+            const now = Math.floor(Date.now() / 1000);
+            lastPing = fetchedPing.timestamp;
+            color = now - lastPing <= 60 ? "bg-green-500" : "bg-red-500";
+        }, 10000);
+    });
+
+
+
 </script>
 
-<div class="animate-pulse p-4 bg-green-500/30 absolute rounded-full left-5 top-10 -z-10">
+<div class="animate-pulse p-4 {color} absolute rounded-full left-5 top-10 -z-10">
 
 </div>
 

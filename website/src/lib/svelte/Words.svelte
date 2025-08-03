@@ -8,7 +8,7 @@
     fetchLastPing,
   } from "$lib/ts/api";
 
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { formatDistanceToNow, formatDuration, intervalToDuration } from "date-fns";
 
   let dailyCount = 0;
@@ -20,20 +20,32 @@
 
   let lastOutageAgo = "";
   let lastOutageDurationFormatted = "";
+  let lastOutageTimestamp: Date | null = null;
 
   let weeklyLongestFormatted = "";
   let monthlyLongestFormatted = "";
 
-  let lastPingAgo = "";
+  let lastPingTimestamp: Date | null = null;
+  let lastPingInSeconds = "";
 
-  function formatMinutes(mins: number): string {
-    if (mins < 1) return "<1 minute";
-    if (mins < 60) return `${Math.round(mins)} minute${mins > 1 ? "s" : ""}`;
-    const dur = intervalToDuration({ start: 0, end: mins * 60 * 1000 });
-    return formatDuration(dur);
+  let mainInterval: number;
+  let pingInterval: number;
+
+  function formatSeconds(secs: number): string {
+    const duration = intervalToDuration({ start: 0, end: secs * 1000 });
+    const formatted = formatDuration(duration, { delimiter: ", " });
+
+    if (secs === 0) return "0 seconds";
+    return formatted || `${Math.round(secs)} second${Math.round(secs) > 1 ? "s" : ""}`;
   }
 
-  onMount(async () => {
+  function formatSecondsAgo(timestamp: Date): string {
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - timestamp.getTime()) / 1000);
+    return `${seconds} second${seconds > 1 ? "s" : ""} ago`;
+  }
+
+  async function updateAllData() {
     try {
       const [daily, weekly, monthly, longest, last, lastPing] = await Promise.all([
         fetchDailyData(),
@@ -41,7 +53,7 @@
         fetchMonthlyData(),
         fetchLongestData(),
         fetchLastData(),
-        fetchLastPing()
+        fetchLastPing(),
       ]);
 
       dailyCount = daily.length;
@@ -49,24 +61,47 @@
       monthlyCount = monthly.length;
 
       longestDuration = longest?.duration || 0;
-      longestDurationFormatted = formatMinutes(longestDuration);
+      longestDurationFormatted = formatSeconds(longestDuration);
 
-      weeklyLongestFormatted = formatMinutes(Math.max(...weekly.map(d => d.duration)));
-      monthlyLongestFormatted = formatMinutes(Math.max(...monthly.map(d => d.duration)));
+      const weeklyDurations = weekly.length > 0 ? weekly.map(d => d.duration) : [0];
+      weeklyLongestFormatted = formatSeconds(Math.max(...weeklyDurations));
+
+      const monthlyDurations = monthly.length > 0 ? monthly.map(d => d.duration) : [0];
+      monthlyLongestFormatted = formatSeconds(Math.max(...monthlyDurations));
 
       if (last) {
-        const lastTime = new Date(last.timestamp);
-        lastOutageAgo = formatDistanceToNow(lastTime, { addSuffix: true });
-        lastOutageDurationFormatted = formatMinutes(last.duration);
+        lastOutageTimestamp = new Date(last.timestamp * 1000);
+        lastOutageAgo = formatDistanceToNow(lastOutageTimestamp, { addSuffix: true });
+        lastOutageDurationFormatted = formatSeconds(last.duration);
       }
 
       if (lastPing?.timestamp) {
-        lastPingAgo = formatDistanceToNow(new Date(lastPing.timestamp), { addSuffix: true });
+        lastPingTimestamp = new Date(lastPing.timestamp * 1000);
+        lastPingInSeconds = formatSecondsAgo(lastPingTimestamp);
       }
-
     } catch (err) {
       console.error("Failed to load powercut data:", err);
     }
+  }
+
+  function updateTimestamps() {
+    if (lastOutageTimestamp) {
+      lastOutageAgo = formatDistanceToNow(lastOutageTimestamp, { addSuffix: true });
+    }
+    if (lastPingTimestamp) {
+      lastPingInSeconds = formatSecondsAgo(lastPingTimestamp);
+    }
+  }
+
+  onMount(async () => {
+    await updateAllData();
+    mainInterval = setInterval(updateAllData, 30000);
+    pingInterval = setInterval(updateTimestamps, 1000);
+  });
+
+  onDestroy(() => {
+    clearInterval(mainInterval);
+    clearInterval(pingInterval);
   });
 </script>
 
@@ -103,7 +138,7 @@
     <br />
 
     <div class="text-center">
-      Last ping <b class="text-red-500">{lastPingAgo}</b>
+      Last ping <b class="text-red-500">{lastPingInSeconds}</b>
     </div>
   </div>
 </div>

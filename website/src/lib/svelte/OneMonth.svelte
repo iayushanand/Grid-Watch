@@ -1,122 +1,148 @@
-<script>
-    const SECONDS_IN_DAY = 86400;
-    const END_TIME = Math.floor(Date.now() / 1000);
-    const START_TIME = END_TIME - 30 * SECONDS_IN_DAY;
+<script lang="ts">
+  import { onMount } from "svelte";
+  import { fetchMonthlyData } from "$lib/ts/api";
+  import { formatDuration, intervalToDuration } from "date-fns";
 
-    const downtimes = [
-        { timestamp: END_TIME - 145670, duration: 760 },
-        { timestamp: END_TIME - 192340, duration: 1086 },
-        { timestamp: END_TIME - 245670, duration: 512 },
-        { timestamp: END_TIME - 312340, duration: 903 },
-        { timestamp: END_TIME - 386700, duration: 600 },
-        { timestamp: END_TIME - 442100, duration: 990 },
-        { timestamp: END_TIME - 487650, duration: 756 },
-        { timestamp: END_TIME - 538900, duration: 849 },
-        { timestamp: END_TIME - 589320, duration: 777 },
-        { timestamp: END_TIME - 634500, duration: 1012 },
-        { timestamp: END_TIME - 744560, duration: 843 },
-        { timestamp: END_TIME - 800000, duration: 600 },
-        { timestamp: END_TIME - 850000, duration: 1200 },
-        { timestamp: END_TIME - 900000, duration: 450 },
-        { timestamp: END_TIME - 950000, duration: 300 }
-    ];
+  const SECONDS_IN_DAY = 86400;
 
-    function formatIST(unix) {
-        return new Date(unix * 1000).toLocaleString("en-IN", {
-            timeZone: "Asia/Kolkata",
-            hour12: true
-        });
-    }
+  let END_TIME = Math.floor(Date.now() / 1000);
+  let START_TIME = END_TIME - 30 * SECONDS_IN_DAY;
 
-    const bar_details = [];
+  let downtimes: { timestamp: number; duration: number }[] = [];
 
+  $: bar_details = [];
+  $: {
+    END_TIME = Math.floor(Date.now() / 1000);
+    START_TIME = END_TIME - 30 * SECONDS_IN_DAY;
+    
+    bar_details = [];
     for (let i = 0; i < 30; i++) {
-        const dayStart = END_TIME - (i + 1) * SECONDS_IN_DAY;
-        const dayEnd = END_TIME - i * SECONDS_IN_DAY;
+      const dayStart = END_TIME - (i + 1) * SECONDS_IN_DAY;
+      const dayEnd = END_TIME - i * SECONDS_IN_DAY;
 
-        const overlaps = downtimes.filter(down => {
-            const downStart = down.timestamp;
-            const downEnd = down.timestamp + down.duration;
-            return downStart < dayEnd && downEnd > dayStart;
+      const overlaps = downtimes.filter(down => {
+        const downStart = down.timestamp;
+        const downEnd = down.timestamp + down.duration;
+        return downStart < dayEnd && downEnd > dayStart;
+      });
+
+      if (overlaps.length > 0) {
+        bar_details.push({
+          status: "down",
+          downtimes: overlaps,
+          dayStart
         });
-
-        if (overlaps.length > 0) {
-            bar_details.push({
-                status: "down",
-                downtimes: overlaps,
-                dayStart
-            });
-        } else {
-            bar_details.push({
-                status: "up",
-                dayStart
-            });
-        }
+      } else {
+        bar_details.push({
+          status: "up",
+          dayStart
+        });
+      }
     }
-
     bar_details.reverse();
+  }
 
-    let tooltipContent = "";
-    let tooltipX = 0;
-    let tooltipY = 0;
-    let showTooltip = false;
+  function formatIST(unix: number): string {
+    const date = new Date(unix * 1000);
+    return date.toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true
+    });
+  }
 
-    function handleMouseEnter(e, data) {
-        const rect = e.target.getBoundingClientRect();
-        const tooltipWidth = 200; 
-        const padding = 8;
+  function formatHead(unix: number): string {
+    const date = new Date(unix * 1000);
+    return date.toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      month: 'short',
+      day: 'numeric'
+    });
+  }
+  
 
-        let x = rect.left + rect.width / 2;
-        const y = rect.top - 10;
+  function formatSeconds(secs: number): string {
+    if (secs === 0) return "0 seconds";
+    if (secs < 60) return `${Math.round(secs)} second${Math.round(secs) > 1 ? "s" : ""}`;
+    
+    const duration = intervalToDuration({ start: 0, end: secs * 1000 });
+    const formatted = formatDuration(duration, { delimiter: ", " });
+    
+    return formatted || "Unknown duration";
+  }
 
-        const screenWidth = window.innerWidth;
+  let tooltipContent = "";
+  let tooltipX = 0;
+  let tooltipY = 0;
+  let showTooltip = false;
 
-        if (x - tooltipWidth / 2 < padding) {
-            x = tooltipWidth / 2 + padding;
-        } else if (x + tooltipWidth / 2 > screenWidth - padding) {
-            x = screenWidth - tooltipWidth / 2 - padding;
-        }
+  function handleMouseEnter(e: MouseEvent, data: any) {
+    const rect = (e.target as HTMLElement).getBoundingClientRect();
+    const tooltipWidth = 200;
+    const padding = 8;
 
-        tooltipX = x;
-        tooltipY = y;
+    let x = rect.left + rect.width / 2;
+    const y = rect.top - 10;
 
-        if (data.status === "down") {
-            tooltipContent = `
-                <div><strong>${formatIST(data.dayStart)}</strong></div>
-                ${data.downtimes.map(d => `🔴 ${formatIST(d.timestamp)} for ${Math.floor(d.duration / 60)} min`).join("<br>")}
-            `;
-        } else {
-            tooltipContent = `<div><strong>${formatIST(data.dayStart)}</strong></div>`;
-        }
+    const screenWidth = window.innerWidth;
 
-        showTooltip = true;
+    if (x - tooltipWidth / 2 < padding) {
+      x = tooltipWidth / 2 + padding;
+    } else if (x + tooltipWidth / 2 > screenWidth - padding) {
+      x = screenWidth - tooltipWidth / 2 - padding;
     }
 
+    tooltipX = x;
+    tooltipY = y;
 
-    function handleMouseLeave() {
-        showTooltip = false;
+    if (data.status === "down") {
+      tooltipContent = `
+        <div><strong>${formatHead(data.dayStart)}</strong></div>
+        ${data.downtimes.map(d => `🔴 ${formatIST(d.timestamp)} for ${formatSeconds(d.duration)}`).join("<br>")}
+      `;
+    } else {
+      tooltipContent = `<div><strong>No outages on ${formatHead(data.dayStart)}</strong></div>`;
     }
+
+    showTooltip = true;
+  }
+
+  function handleMouseLeave() {
+    showTooltip = false;
+  }
+
+  onMount(async () => {
+    try {
+      downtimes = await fetchMonthlyData();
+    } catch (err) {
+      console.error("Failed to load monthly data:", err);
+      downtimes = [];
+    }
+  });
 </script>
 
 <div class="mt-10 flex gap-1 sm:gap-1 px-1 sm:px-6 h-[12vh]">
-    {#each bar_details as data, i}
-        <div
-            class="{data.status === 'down' ? 'bg-red-500' : 'bg-green-500'} flex-1 rounded-sm relative"
-            style="min-width: 0"
-            on:mouseenter={(e) => handleMouseEnter(e, data)}
-            on:mouseleave={handleMouseLeave}
-            tabindex="{i}"
-        ></div>
-    {/each}
+  {#each bar_details as data, i}
+    <div
+      class="{data.status === 'down' ? 'bg-red-500' : 'bg-green-500'} flex-1 rounded-sm relative"
+      style="min-width: 0"
+      on:mouseenter={(e) => handleMouseEnter(e, data)}
+      on:mouseleave={handleMouseLeave}
+      tabindex="{i}"
+    ></div>
+  {/each}
 </div>
 
 <p class="mx-4 text-sm mt-2 text-gray-300">30d</p>
 
 {#if showTooltip}
-    <div
-        class="fixed z-50 bg-black text-white text-sm px-3 py-2 rounded-md shadow-lg max-w-full whitespace-nowrap pointer-events-none"
-        style="top: {tooltipY}px; left: {tooltipX}px; transform: translate(-50%, -100%)"
-    >
-        {@html tooltipContent}
-    </div>
+  <div
+    class="fixed z-50 bg-black text-white text-sm px-3 py-2 rounded-md shadow-lg max-w-full whitespace-nowrap pointer-events-none"
+    style="top: {tooltipY}px; left: {tooltipX}px; transform: translate(-50%, -100%)"
+  >
+    {@html tooltipContent}
+  </div>
 {/if}
