@@ -7,10 +7,10 @@ Grid Watch is a real-time power monitoring solution designed to track the stabil
 ## 🛠️ How It Works
 
 1. **ESP Device Monitoring**  
-    The ESP device is plugged into your home power supply. Every minute, it sends a `ping` to the backend server, indicating that power is available. 🔌
+    The ESP device is plugged into your home power supply. Every 10 seconds, it sends a `ping` to the backend server, indicating that power is available. 🔌
 
 2. **Backend Processing**  
-    The backend records the timestamp of each ping. If the time difference between two consecutive pings exceeds 70 seconds, it is considered a power outage or disruption. This event is then logged into the database. 🐘
+    The backend records the timestamp of each ping. If the time difference between two consecutive pings exceeds 30 seconds, it is considered a power outage or disruption. This event is then logged into the database. 🐘
 
 3. **Web Visualization**  
     The website fetches the logged data and displays it in a clear, bar-format chart. Each bar represents a detected outage, allowing you to easily visualize the frequency and duration of power interruptions. 📊
@@ -21,23 +21,22 @@ Grid Watch is a real-time power monitoring solution designed to track the stabil
 
 - **Real-Time Monitoring:** Immediate detection of power outages. ⏱️
 - **Automatic Logging:** Outages are automatically recorded in the database. 📝
-- **Intuitive Visualization:** Outages are displayed in a bar chart for easy analysis. 📈
-- **Simple Setup:** Just plug in the ESP device and start monitoring. 🧩
+- **Simple Setup:** Just plug in the ESP device, config files and start monitoring. 🧩
 
 ---
 
 ## 🗂️ Project Structure
 
-- **ESP Firmware:** Handles periodic pings to the backend. 🖥️
-- **Backend Server:** Receives pings, detects outages, and stores events. 🗃️
-- **Frontend Website:** Visualizes outage data in a user-friendly format. 🌐
+- [**ESP Firmware:**](GridWatchESP) Handles periodic pings to the backend. 🖥️
+- [**Backend Server:**](backend) Receives pings, detects outages, and stores events. 🗃️
+- [**Frontend Website:**](website) Visualizes outage data in a user-friendly format. 🌐
 
----
+
 
 ## 🚀 Setup Instructions
 
 1. **Flash the ESP:**  
-    Upload the provided firmware to your ESP device. 🔥
+    Upload the provided firmware to your ESP device. (Make sure you add api key and wifi creds) 🔥
 
 2. **Connect to Power:**  
     Plug the ESP into your home power supply. ⚡
@@ -52,18 +51,28 @@ Grid Watch is a real-time power monitoring solution designed to track the stabil
 
 ## 🖼️ Screenshots
 
-### ESP Device Setup
-coming soon
+### ESP Device
+
+<img src = "https://gcdnb.pbrd.co/images/AaTvJDDFfJ1I.png" width=200 alt="esp">
+
 
 ### Website Visualization
 ![webpage](https://gcdnb.pbrd.co/images/llXGlTRtgZGb.png?o=1)
 
 ---
 
+## 🧰 Tech Stack
+- ESP32 (Arduino framework) (PlatformIO)
+- Backend: ExpressJS
+- Database: PostgreSQL
+- Frontend: Svelte
+
+
+---
+
+
 ## 📄 License
 
 This project is licensed under the MIT License.
 
 ---
-
-**Monitor your grid. Stay informed.** 🧐
