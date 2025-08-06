@@ -117,7 +117,7 @@
     try {
       setInterval(
         async () => {
-        downtimes = await fetchDailyData();
+        downtimes = await fetchWeeklyData();
         },
         30000
       )
