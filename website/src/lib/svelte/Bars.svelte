@@ -14,7 +14,7 @@
             const fetchedPing = await fetchLastPing();
             const now = Math.floor(Date.now() / 1000);
             lastPing = fetchedPing.timestamp;
-            color = now - lastPing <= 60 ? "bg-green-500" : "bg-red-500";
+            color = now - lastPing <= 30 ? "bg-green-500" : "bg-red-500";
         }, 10000);
     });
 

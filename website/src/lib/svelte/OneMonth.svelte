@@ -116,7 +116,12 @@
 
   onMount(async () => {
     try {
-      downtimes = await fetchMonthlyData();
+      setInterval(
+        async () => {
+        downtimes = await fetchDailyData();
+        },
+        30000
+      )
     } catch (err) {
       console.error("Failed to load monthly data:", err);
       downtimes = [];

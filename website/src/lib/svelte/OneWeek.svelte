@@ -115,7 +115,12 @@
 
   onMount(async () => {
     try {
-      downtimes = await fetchWeeklyData();
+      setInterval(
+        async () => {
+        downtimes = await fetchDailyData();
+        },
+        30000
+      )
     } catch (err) {
       console.error("Failed to load weekly data:", err);
       downtimes = [];
