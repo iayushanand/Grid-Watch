@@ -2,20 +2,25 @@
 #include <HttpClient.h>
 #include <WiFi.h>
 
+
 #define LED_PIN 2
 const char WIFI_SSID[] = "your-wifi-ssid";
 const char WIFI_PASSWORD[] = "your-wifi-password";
 
+
 String url = "your-backend-url";
+
 
 void makeRequest();
 void connectWifi();
+
 
 void setup() {
   pinMode(LED_PIN, OUTPUT);
   Serial.begin(115200);
   connectWifi();
 }
+
 
 void loop() {
   makeRequest();
