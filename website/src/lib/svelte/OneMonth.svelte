@@ -116,6 +116,7 @@
 
   onMount(async () => {
     try {
+      downtimes = await fetchMonthlyData();
       setInterval(
         async () => {
         downtimes = await fetchMonthlyData();

@@ -115,6 +115,7 @@
 
   onMount(async () => {
     try {
+      downtimes = await fetchDailyData();
       setInterval(
         async () => {
         downtimes = await fetchDailyData();
